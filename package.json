@@ -1,6 +1,6 @@
 {
   "name": "@ailo/koa-logger-middleware",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Koa2 middleware for logging requests using custom logger as winstonjs",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
