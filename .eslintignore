@@ -1,0 +1,4 @@
+*.generated.ts
+*.d.ts
+*.js
+build/*
