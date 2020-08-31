@@ -6,11 +6,21 @@ import chalk from "chalk";
 export interface Logger {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   error(...data: any[]): void;
+  warn(...data: any[]): void;
   info(...data: any[]): void;
+  debug(...data: any[]): void;
+  silly(...data: any[]): void;
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 const defaultOptions = {
+  logLevel(ctx: Koa.Context): keyof Logger {
+    if (["/ping", "/metrics"].includes(ctx.path)) {
+      return "silly";
+    }
+    return "info";
+  },
+
   color(status: number) {
     if (status < 400) {
       return "green";
@@ -61,7 +71,8 @@ const defaultOptions = {
 
   async onStart(ctx: Koa.Context) {
     const info = { ...ctx.__logInfo, logType: "routeStart" };
-    this.logger.info(this.onStartFormat(ctx), info);
+    const logLevel = this.logLevel(ctx);
+    this.logger[logLevel](this.onStartFormat(ctx), info);
   },
 
   onErrorFormat(ctx: Koa.Context) {
@@ -83,9 +94,9 @@ const defaultOptions = {
     const { correlationId } = ctx.__logInfo;
     const { status } = ctx.__logger;
     const statusColor = chalk[this.color(status)];
-    return `<-- ${chalk.bold(ctx.method)} ${
+    return `<-- ${chalk.bold(ctx.method)} ${chalk.blue.bold(
       ctx.url
-    } - status=${statusColor.bold(status)} duration=${timeTake}ms${
+    )} - status=${statusColor.bold(status)} duration=${timeTake}ms${
       correlationId ? ` correlation=${correlationId}` : ""
     }`;
   },
@@ -93,10 +104,19 @@ const defaultOptions = {
   async onEnd(ctx: Koa.Context) {
     const timeTake = Date.now() - ctx.__logger.start;
     const info = { ...ctx.__logInfo, logType: "routeEnd" };
-    this.logger.info(this.onEndFormat(ctx, timeTake), info);
+    const logLevel = this.logLevel(ctx);
+    this.logger[logLevel](this.onEndFormat(ctx, timeTake), info);
   },
 
-  logger: console as Logger,
+  logger: {
+    /* eslint-disable no-console */
+    error: console.error,
+    warn: console.warn,
+    info: console.info,
+    debug: console.debug,
+    silly: console.debug,
+    /* eslint-enable no-console */
+  } as Logger,
 };
 
 export type KoaLoggerMiddlewareOptions = Partial<typeof defaultOptions>;
