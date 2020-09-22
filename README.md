@@ -15,7 +15,7 @@ import { koaLoggerMiddleware } from "koa-logger-middleware";
 
 app.use(
   koaLoggerMiddleware({
-    // your options
+    logger: Logger.logAs("koa"),
   })
 );
 ```
