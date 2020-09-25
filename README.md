@@ -52,26 +52,6 @@ To see all option refer to `src/index.ts` file.
   ```
 - **onErrorFormat**: [Function] - same as onStartFormat but when error occurred
 - **onEndFormat**: [Function] - same as onStartFormat but on response end
-- **fillInfo**: [Function] - information that will be pass to the logger as 2 parameter.
-  It can be usefull for example when you want to parse log to analize them or use it as big data
-  ```js
-  logger({
-    fillInfo(ctx) {
-      ctx.__logInfo = ctx.state.__logInfo = {
-        query: ctx.request.query,
-        method: ctx.request.method,
-        url: ctx.request.url,
-        DeviceId: ctx.request.get('DeviceId'),
-        path: ctx.request.path,
-        ip: ctx.request.ip,
-        host: ctx.request.host,
-        protocol: ctx.request.protocol,
-        ...
-      };
-    },
-  });
-  ```
-- **onError**: [Function] - call when an error occurred. Here you can handle error are whatever
 
 ## Development
 

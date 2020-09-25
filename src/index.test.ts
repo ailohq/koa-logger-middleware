@@ -1,6 +1,15 @@
 import type Koa from "koa";
 import { koaLoggerMiddleware, KoaLoggerMiddlewareOptions } from ".";
 
+function clearChalkFormatting(s: string): string {
+  // Taken from https://stackoverflow.com/a/29497680/1860149
+  return s.replace(
+    // eslint-disable-next-line no-control-regex
+    /[\u001B\u009b][#();?[]*(?:\d{1,4}(?:;\d{0,4})*)?[\d<=>A-ORZcf-nqry]/g,
+    ""
+  );
+}
+
 function setup({ path = "/index", query = "a=b" } = {}) {
   const url = `${path}?${query}`;
   const context: Koa.Context = {
@@ -43,6 +52,37 @@ function setup({ path = "/index", query = "a=b" } = {}) {
 }
 
 describe("koaLoggerMiddleware", () => {
+  it("by default has nice onStart, onError, onEnd messages", async () => {
+    const { context, logger } = setup();
+    await koaLoggerMiddleware({ logger })(context, async () => {});
+
+    expect(
+      logger.info.mock.calls.map((c) => clearChalkFormatting(c[0]))
+    ).toEqual([
+      "--> GET /index - correlation=123",
+      expect.stringMatching(
+        /<-- GET \/index - status=200 duration=\d+ms correlation=123/
+      ),
+    ]);
+
+    jest.clearAllMocks();
+    try {
+      await koaLoggerMiddleware({ logger })(context, () => {
+        throw new Error("test error");
+      });
+      // eslint-disable-next-line
+    } catch (e) {}
+
+    expect(
+      logger.info.mock.calls.map((c) => clearChalkFormatting(c[0]))
+    ).toEqual([
+      "--> GET /index - correlation=123",
+      expect.stringMatching(
+        /<-- GET \/index - status=500 duration=\d+ms correlation=123/
+      ),
+    ]);
+  });
+
   it("options can be redefined", async () => {
     const { context, logger } = setup();
     let call = 0;
