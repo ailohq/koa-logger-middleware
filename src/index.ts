@@ -48,45 +48,24 @@ const defaultOptions = {
     return correlationId;
   },
 
-  async fillError(ctx: Koa.Context) {
-    // eslint-disable-next-line no-multi-assign
-    ctx.__infoError = ctx.state.__infoError = {
-      ...ctx.__logInfo,
-      query: ctx.request.query,
-      method: ctx.request.method,
-      url: ctx.request.url,
-      path: ctx.request.path,
-      ip: ctx.request.ip,
-      host: ctx.request.host,
-      protocol: ctx.request.protocol,
-    };
-  },
-
   onStartFormat(ctx: Koa.Context) {
     const { correlationId } = ctx.__logInfo;
-    return `--> ${chalk.bold(ctx.method)} ${chalk.blue.bold(ctx.url)}${
+    return `--> ${chalk.bold(ctx.method)} ${chalk.blue.bold(ctx.path)}${
       correlationId ? ` - correlation=${correlationId}` : ""
     }`;
   },
 
   async onStart(ctx: Koa.Context) {
-    const info = { ...ctx.__logInfo, logType: "routeStart" };
     const logLevel = this.logLevel(ctx);
-    this.logger[logLevel](this.onStartFormat(ctx), info);
+    this.logger[logLevel](this.onStartFormat(ctx));
   },
 
   onErrorFormat(ctx: Koa.Context) {
-    return `${chalk.red("[ERROR]")} ${chalk.red.bold(ctx.method)} ${ctx.url}`;
+    return `${chalk.red("[ERROR]")} ${chalk.red.bold(ctx.method)} ${ctx.path}`;
   },
 
   async onError(ctx: Koa.Context, err: Error) {
-    const info = {
-      ...ctx.state.__infoError,
-      error: err,
-      logType: "routeError",
-    };
-    this.logger.error(this.onErrorFormat(ctx), info);
-
+    this.logger.error(this.onErrorFormat(ctx));
     throw err;
   },
 
@@ -95,7 +74,7 @@ const defaultOptions = {
     const { status } = ctx.__logger;
     const statusColor = chalk[this.color(status)];
     return `<-- ${chalk.bold(ctx.method)} ${chalk.blue.bold(
-      ctx.url
+      ctx.path
     )} - status=${statusColor.bold(status)} duration=${timeTake}ms${
       correlationId ? ` correlation=${correlationId}` : ""
     }`;
@@ -103,9 +82,8 @@ const defaultOptions = {
 
   async onEnd(ctx: Koa.Context) {
     const timeTake = Date.now() - ctx.__logger.start;
-    const info = { ...ctx.__logInfo, logType: "routeEnd" };
     const logLevel = this.logLevel(ctx);
-    this.logger[logLevel](this.onEndFormat(ctx, timeTake), info);
+    this.logger[logLevel](this.onEndFormat(ctx, timeTake));
   },
 
   logger: {
@@ -129,7 +107,6 @@ export function koaLoggerMiddleware(opts: KoaLoggerMiddlewareOptions = {}) {
     try {
       await options.fillInfo(ctx);
       await options.correlationId(ctx);
-      await options.fillError(ctx);
       await options.onStart(ctx);
       await next();
       ctx.__logger.status = ctx.status;
