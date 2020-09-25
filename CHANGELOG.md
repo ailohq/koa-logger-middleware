@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/ailohq/koa-logger-middleware/compare/v1.1.0...v1.1.1) (2020-09-25)
+
+
+### Bug Fixes
+
+* Remove unneeded options; do not log query params; add tests for default logs format ([192abd4](https://github.com/ailohq/koa-logger-middleware/commit/192abd4805e59724b28209fc59ea1648d6a4c38f))
+
 ## [1.1.0](https://github.com/ailohq/koa-logger-middleware/compare/v1.0.1...v1.1.0) (2020-08-31)
 
 
