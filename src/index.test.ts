@@ -27,10 +27,12 @@ function setup({ path = "/index", query = "a=b" } = {}) {
       host: "localhost",
       protocol: "ipv4",
       get(k: string) {
-        if (k === "x-correlation-id") {
-          return "123";
-        }
-        return "";
+        const headers: { [key: string]: string | undefined } = {
+          "x-correlation-id": "123",
+          "apollographql-client-name": "ailo-consumer-app",
+          "apollographql-client-version": "1.0.0",
+        };
+        return headers[k] || "";
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
@@ -59,9 +61,9 @@ describe("koaLoggerMiddleware", () => {
     expect(
       logger.info.mock.calls.map((c) => clearChalkFormatting(c[0]))
     ).toEqual([
-      "--> GET /index - correlation=123",
+      "--> GET /index - correlationId=123 client=ailo-consumer-app@1.0.0",
       expect.stringMatching(
-        /<-- GET \/index - status=200 duration=\d+ms correlation=123/
+        /<-- GET \/index - status=200 duration=\d+ms correlationId=123 client=ailo-consumer-app@1.0.0/
       ),
     ]);
 
@@ -76,9 +78,9 @@ describe("koaLoggerMiddleware", () => {
     expect(
       logger.info.mock.calls.map((c) => clearChalkFormatting(c[0]))
     ).toEqual([
-      "--> GET /index - correlation=123",
+      "--> GET /index - correlationId=123 client=ailo-consumer-app@1.0.0",
       expect.stringMatching(
-        /<-- GET \/index - status=500 duration=\d+ms correlation=123/
+        /<-- GET \/index - status=500 duration=\d+ms correlationId=123 client=ailo-consumer-app@1.0.0/
       ),
     ]);
   });

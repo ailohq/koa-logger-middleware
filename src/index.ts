@@ -13,7 +13,7 @@ export interface Logger {
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
-const defaultOptions = {
+export const defaultOptions = {
   logLevel(ctx: Koa.Context): keyof Logger {
     if (["/ping", "/metrics"].includes(ctx.path)) {
       return "silly";
@@ -32,26 +32,27 @@ const defaultOptions = {
   },
 
   async fillInfo(ctx: Koa.Context) {
-    // eslint-disable-next-line no-multi-assign
-    ctx.__logInfo = ctx.state.__logInfo = {};
-  },
-
-  async correlationId(ctx: Koa.Context) {
-    const correlationId = ctx.request.get("x-correlation-id")
-      ? ctx.request.get("x-correlation-id").slice(0, 100)
-      : undefined;
-    ctx.__logInfo.correlationId = correlationId;
-    ctx.state.__logInfo.correlationId = correlationId;
-    if (correlationId) {
-      ctx.response.set("X-Correlation-Id", correlationId);
-    }
-    return correlationId;
+    ctx.__logInfo = {
+      deviceId: ctx.request.get("x-device-id")?.slice(0, 100),
+      correlationId: ctx.request.get("x-correlation-id")?.slice(0, 100),
+      client: ctx.request.get("apollographql-client-name")
+        ? [
+            ctx.request.get("apollographql-client-name"),
+            ctx.request.get("apollographql-client-version"),
+          ]
+            .filter(Boolean)
+            .join("@") || undefined
+        : undefined,
+    };
   },
 
   onStartFormat(ctx: Koa.Context) {
-    const { correlationId } = ctx.__logInfo;
+    const info = Object.entries(ctx.__logInfo)
+      .filter((entry) => entry[1])
+      .map((entry) => `${entry[0]}=${entry[1]}`)
+      .join(" ");
     return `--> ${chalk.bold(ctx.method)} ${chalk.blue.bold(ctx.path)}${
-      correlationId ? ` - correlation=${correlationId}` : ""
+      info ? ` - ${info}` : ""
     }`;
   },
 
@@ -70,13 +71,18 @@ const defaultOptions = {
   },
 
   onEndFormat(ctx: Koa.Context, timeTake: number) {
-    const { correlationId } = ctx.__logInfo;
     const { status } = ctx.__logger;
     const statusColor = chalk[this.color(status)];
-    return `<-- ${chalk.bold(ctx.method)} ${chalk.blue.bold(
-      ctx.path
-    )} - status=${statusColor.bold(status)} duration=${timeTake}ms${
-      correlationId ? ` correlation=${correlationId}` : ""
+    const info = Object.entries({
+      status: statusColor.bold(status),
+      duration: `${timeTake}ms`,
+      ...ctx.__logInfo,
+    })
+      .filter((entry) => entry[1])
+      .map((entry) => `${entry[0]}=${entry[1]}`)
+      .join(" ");
+    return `<-- ${chalk.bold(ctx.method)} ${chalk.blue.bold(ctx.path)}${
+      info ? ` - ${info}` : ""
     }`;
   },
 
@@ -106,7 +112,6 @@ export function koaLoggerMiddleware(opts: KoaLoggerMiddlewareOptions = {}) {
     ctx.__logger = { status: 500, start: Date.now() };
     try {
       await options.fillInfo(ctx);
-      await options.correlationId(ctx);
       await options.onStart(ctx);
       await next();
       ctx.__logger.status = ctx.status;
