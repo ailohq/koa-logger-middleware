@@ -28,7 +28,7 @@ function setup({ path = "/index", query = "a=b" } = {}) {
       protocol: "ipv4",
       get(k: string) {
         const headers: { [key: string]: string | undefined } = {
-          "x-correlation-id": "123",
+          "ailo-correlation-id": "123",
           "apollographql-client-name": "ailo-consumer-app",
           "apollographql-client-version": "1.0.0",
         };

@@ -33,8 +33,8 @@ export const defaultOptions = {
 
   async fillInfo(ctx: Koa.Context) {
     ctx.__logInfo = {
-      deviceId: ctx.request.get("x-device-id")?.slice(0, 100),
-      correlationId: ctx.request.get("x-correlation-id")?.slice(0, 100),
+      deviceId: ctx.request.get("ailo-device-id")?.slice(0, 100),
+      correlationId: ctx.request.get("ailo-correlation-id")?.slice(0, 100),
       client: ctx.request.get("apollographql-client-name")
         ? [
             ctx.request.get("apollographql-client-name"),
