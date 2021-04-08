@@ -83,6 +83,14 @@ describe("koaLoggerMiddleware", () => {
         /<-- GET \/index - status=500 duration=\d+ms correlationId=123 client=ailo-consumer-app@1.0.0/
       ),
     ]);
+
+    expect(
+      logger.error.mock.calls.map((c) => clearChalkFormatting(c[0]))
+    ).toEqual([
+      expect.stringMatching(
+        /\[ERROR] GET \/index Error: test error\n.*at.+src\/index.test.ts/
+      ),
+    ]);
   });
 
   it("options can be redefined", async () => {

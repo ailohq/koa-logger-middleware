@@ -61,13 +61,15 @@ export const defaultOptions = {
     this.logger[logLevel](this.onStartFormat(ctx));
   },
 
-  onErrorFormat(ctx: Koa.Context) {
-    return `${chalk.red("[ERROR]")} ${chalk.red.bold(ctx.method)} ${ctx.path}`;
+  onErrorFormat(ctx: Koa.Context, error: Error) {
+    return `${chalk.red("[ERROR]")} ${chalk.red.bold(ctx.method)} ${ctx.path} ${
+      error.stack || error
+    }`;
   },
 
-  async onError(ctx: Koa.Context, err: Error) {
-    this.logger.error(this.onErrorFormat(ctx));
-    throw err;
+  async onError(ctx: Koa.Context, error: Error) {
+    this.logger.error(this.onErrorFormat(ctx, error));
+    throw error;
   },
 
   onEndFormat(ctx: Koa.Context, timeTake: number) {
