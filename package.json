@@ -1,6 +1,6 @@
 {
   "name": "@ailo/koa-logger-middleware",
-  "version": "1.2.2",
+  "version": "1.2.4",
   "description": "Koa2 middleware for logging requests using custom logger as winstonjs",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -42,8 +42,7 @@
     "clean": "trash build test",
     "prepare-release": "run-s reset lint test build version-bump",
     "validate": "run-s lint test build",
-    "release": "yarn prepare-release && git push --follow-tags origin master --no-verify && yarn publish --non-interactive",
-    "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('yarn') === -1) throw new Error('@ailo/graphql-client must be installed with Yarn: https://yarnpkg.com/')\""
+    "release": "yarn prepare-release && git push --follow-tags origin master --no-verify && yarn publish --non-interactive"
   },
   "husky": {
     "hooks": {
