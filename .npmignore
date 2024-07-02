@@ -1,4 +1,5 @@
 src
+result
 test
 tsconfig.json
 tsconfig.module.json

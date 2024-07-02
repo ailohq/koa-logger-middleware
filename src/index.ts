@@ -107,7 +107,9 @@ export const defaultOptions = {
 
 export type KoaLoggerMiddlewareOptions = Partial<typeof defaultOptions>;
 
-export function koaLoggerMiddleware(opts: KoaLoggerMiddlewareOptions = {}) {
+export function koaLoggerMiddleware(
+  opts: KoaLoggerMiddlewareOptions = {}
+): Koa.Middleware {
   const options = { ...defaultOptions, ...opts };
 
   const logger: Koa.Middleware = async (ctx, next) => {
