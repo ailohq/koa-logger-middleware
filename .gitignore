@@ -1,6 +1,8 @@
 node_modules
 build
 test
+result
+.direnv
 src/**.js
 .idea/*
 

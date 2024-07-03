@@ -70,8 +70,6 @@ yarn test:watch # unit tests in watch mode
 
 ## Releasing
 
-**Note: Releasing is done manually (CI isn't configured yet).** Linters, tests, build and so on are run during each `git push` / `yarn release`.
-
 ```sh
 yarn release # will automatically ask you about version bump, run tests and build, and push new version to git & npm
 ```
